@@ -20,6 +20,8 @@ function SignUpForm() {
   const [payload, setPayload] = useState({
     campaignUuid: '46aa3270-d2ee-11ea-a9f0-e9a68ccff42a'
   })
+  const [emailStatus, setEmailStatus] = useState('')
+  const [fortifiedPassword, setFortifiedPassword] = useState()
 
   const handleInputs = (e) => {
     payload[e.target.name] = e.target.value
@@ -41,8 +43,7 @@ function SignUpForm() {
       })
     })
     const json = await response.json()
-    console.log(json.data.status)
-    return json
+    setEmailStatus(json.data.status)
   }
 
   useEffect(() => {
@@ -93,6 +94,12 @@ function SignUpForm() {
             variant="outlined"
           />
           <TextField
+            error={emailStatus === 'EXISTS'}
+            helperText={
+              emailStatus === 'EXISTS'
+                ? 'Email already exists. Please enter another email.'
+                : null
+            }
             required
             onChange={handleInputs}
             style={styles.inputs}
@@ -113,7 +120,17 @@ function SignUpForm() {
             label="Password"
             variant="outlined"
           />
-          <Button disabled type="submit" variant="contained" color="primary">
+          <Button
+            disabled={
+              !payload.firstName ||
+              !payload.lastName ||
+              !payload.password ||
+              emailStatus !== 'OK'
+            }
+            type="submit"
+            variant="contained"
+            color="primary"
+          >
             Signup
           </Button>
           <FormHelperText>
