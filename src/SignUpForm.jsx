@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { TextField, Box, Button, FormHelperText } from '@material-ui/core'
+import useDebounce from './hooks/useDebounce'
 
 const styles = {
   wrapper: {
@@ -14,17 +15,17 @@ const styles = {
   }
 }
 
-let timer
-
 function SignUpForm() {
   const [payload, setPayload] = useState({
-    campaignUuid: '46aa3270-d2ee-11ea-a9f0-e9a68ccff42a'
+    campaignUuid: '46aa3270-d2ee-11ea-a9f0-e9a68ccff42a',
+    email: ''
   })
   const [emailStatus, setEmailStatus] = useState('')
-  const [fortifiedPassword, setFortifiedPassword] = useState()
+  const [fortifiedPassword, setFortifiedPassword] = useState(null)
 
   const handleInputs = (e) => {
     payload[e.target.name] = e.target.value
+    setEmailStatus(!payload.email ? '' : emailStatus)
     setPayload({ ...payload })
   }
 
@@ -46,14 +47,22 @@ function SignUpForm() {
     setEmailStatus(json.data.status)
   }
 
-  useEffect(() => {
-    timer = setTimeout(() => {
-      verifyUniqueEmail()
-    }, 1500)
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [payload.email])
+  const verifySecurePassword = () => {
+    const { password } = payload
+    // if (!password) return
+    setFortifiedPassword(
+      !password
+        ? null
+        : !!(
+            password.match(
+              /(?=(?:.*[a-z]){1,})(?=(?:.*[A-Z]){1,})(?=(?:.*[\d]){1,})(?=(?:.*[!@#$%^&*()<>;:'"/?\\\.])?).*/g
+            ) && password.length >= 8
+          )
+    )
+  }
+
+  useDebounce(verifyUniqueEmail, [payload.email], 1000)
+  useDebounce(verifySecurePassword, [payload.password], 400)
 
   const sendUserData = async (e) => {
     e.preventDefault()
@@ -111,6 +120,12 @@ function SignUpForm() {
             variant="outlined"
           />
           <TextField
+            error={fortifiedPassword === false}
+            helperText={
+              fortifiedPassword === false
+                ? 'Password should be 8 characters long and include at least one of the following: a–z, A–Z, and 0–9.'
+                : null
+            }
             required
             onChange={handleInputs}
             style={styles.inputs}
