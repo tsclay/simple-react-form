@@ -233,9 +233,15 @@ function SignUpForm() {
                 !payload.lastName ||
                 !payload.password ||
                 emailStatus !== 'OK' ||
-                fortifiedPassword !== true
-                  ? 'Waiting...'
-                  : 'Ready!'}
+                fortifiedPassword !== true ? (
+                  <span role="img" aria-label="Locked">
+                    Locked 🔒
+                  </span>
+                ) : (
+                  <span role="img" aria-label="Ready!">
+                    Ready! 🚀
+                  </span>
+                )}
               </Button>
               <FormHelperText
                 style={{ fontStyle: 'italic', fontWeight: 'bold' }}
