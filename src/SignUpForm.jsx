@@ -1,21 +1,45 @@
 import React, { useState } from 'react'
 import { TextField, Box, Button, FormHelperText } from '@material-ui/core'
+import { makeStyles } from '@material-ui/core/styles'
 import useDebounce from './hooks/useDebounce'
 
-const styles = {
+const useStyles = makeStyles({
+  inputs: {
+    width: '100%'
+  },
+  helperText: {
+    background: 'transparent',
+    color: 'red',
+    width: '100%'
+  },
+  inputWrappers: {
+    width: '100%',
+    marginBottom: '1rem'
+  },
+  submitButton: {
+    background: 'rgba(150,56,216,1)',
+    color: 'white'
+  }
+})
+
+const baseStyles = {
   wrapper: {
     width: '500px',
-    margin: '0 auto'
+    margin: '0 auto',
+    padding: '2rem',
+    boxSizing: 'box-border',
+    borderRadius: '4px',
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    background:
+      'linear-gradient(0deg, rgba(238,238,238,0.7) 0%, rgba(150,56,216,0.3) 100%)'
   },
   form: {
     width: '100%'
-  },
-  inputs: {
-    marginBottom: '1rem'
   }
 }
 
 function SignUpForm() {
+  const classes = useStyles()
   const [payload, setPayload] = useState({
     campaignUuid: '46aa3270-d2ee-11ea-a9f0-e9a68ccff42a',
     email: ''
@@ -49,7 +73,6 @@ function SignUpForm() {
 
   const verifySecurePassword = () => {
     const { password } = payload
-    // if (!password) return
     setFortifiedPassword(
       !password
         ? null
@@ -79,13 +102,14 @@ function SignUpForm() {
   }
 
   return (
-    <div id="signup-form" style={styles.wrapper}>
-      <form onSubmit={sendUserData} style={styles.form}>
+    <div id="signup-form" style={baseStyles.wrapper}>
+      <h1>Get Started Today!</h1>
+      <form onSubmit={sendUserData} style={baseStyles.form}>
         <Box display="flex" flexDirection="column">
           <TextField
             required
             onChange={handleInputs}
-            style={styles.inputs}
+            className={classes.inputWrappers}
             type="text"
             name="firstName"
             id="firstName"
@@ -95,47 +119,55 @@ function SignUpForm() {
           <TextField
             required
             onChange={handleInputs}
-            style={styles.inputs}
+            className={classes.inputWrappers}
             type="text"
             name="lastName"
             id="lastName"
             label="Last Name"
             variant="outlined"
           />
-          <TextField
-            error={emailStatus === 'EXISTS'}
-            helperText={
-              emailStatus === 'EXISTS'
-                ? 'Email already exists. Please enter another email.'
-                : null
-            }
-            required
-            onChange={handleInputs}
-            style={styles.inputs}
-            autoComplete="off"
-            type="email"
-            name="email"
-            id="outlined-basic"
-            label="Email Address"
-            variant="outlined"
-          />
-          <TextField
-            error={fortifiedPassword === false}
-            helperText={
-              fortifiedPassword === false
-                ? 'Password should be 8 characters long and include at least one of the following: a–z, A–Z, and 0–9.'
-                : null
-            }
-            required
-            onChange={handleInputs}
-            style={styles.inputs}
-            type="password"
-            name="password"
-            id="password"
-            label="Password"
-            variant="outlined"
-          />
+          <Box className={classes.inputWrappers}>
+            <TextField
+              error={emailStatus === 'EXISTS'}
+              className={classes.inputs}
+              required
+              onChange={handleInputs}
+              autoComplete="off"
+              type="email"
+              name="email"
+              id="outlined-basic"
+              label="Email Address"
+              variant="outlined"
+            />
+            {emailStatus === 'EXISTS' ? (
+              <FormHelperText className={classes.helperText}>
+                Email already exists. Please enter another email.
+              </FormHelperText>
+            ) : null}
+          </Box>
+
+          <Box className={classes.inputWrappers}>
+            <TextField
+              error={fortifiedPassword === false}
+              required
+              onChange={handleInputs}
+              className={classes.inputs}
+              type="password"
+              name="password"
+              id="password"
+              label="Password"
+              variant="outlined"
+            />
+            {fortifiedPassword === false ? (
+              <FormHelperText className={classes.helperText}>
+                Password should be 8 characters long and include at least one of
+                the following: a–z, A–Z, and 0–9.
+              </FormHelperText>
+            ) : null}
+          </Box>
+
           <Button
+            className={classes.submitButton}
             disabled={
               !payload.firstName ||
               !payload.lastName ||
@@ -146,11 +178,16 @@ function SignUpForm() {
             variant="contained"
             color="primary"
           >
-            Signup
+            {!payload.firstName ||
+            !payload.lastName ||
+            !payload.password ||
+            emailStatus !== 'OK'
+              ? 'Waiting...'
+              : 'Ready!'}
           </Button>
-          <FormHelperText>
-            Button will become clickable once all fields are filled with valid
-            credentials.
+          <FormHelperText style={{ fontStyle: 'italic' }}>
+            Button will become clickable once all fields are filled without
+            errors.
           </FormHelperText>
         </Box>
       </form>
