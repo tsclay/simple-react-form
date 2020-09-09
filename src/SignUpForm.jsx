@@ -131,7 +131,6 @@ function SignUpForm() {
       })
     })
     const json = await response.json()
-    console.log('here is the response as json: ', json)
     setHasRegistered(json.hasOwnProperty('errors') ? 400 : 200)
   }
 
